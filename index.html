@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job / Booking Tracker</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f6f8fa;
+      color: #1f2937;
+      line-height: 1.5;
+    }
+
+    .app {
+      width: min(100%, 980px);
+      margin: 0 auto;
+      padding: 32px 16px;
+    }
+
+    header {
+      margin-bottom: 26px;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 750;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      margin-bottom: 14px;
+    }
+
+    .intro {
+      margin: 8px 0 0;
+      color: #5f6b7a;
+      font-size: 1rem;
+    }
+
+    .alerts {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .alert {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      border: 1px solid #f6c57b;
+      border-left: 5px solid #ea7a00;
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #fff3df;
+      color: #733b00;
+      font-size: 0.96rem;
+      font-weight: 700;
+    }
+
+    section {
+      background: #ffffff;
+      border: 1px solid #d9dee5;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 5px;
+      font-size: 0.94rem;
+      font-weight: 650;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1px solid #c8d0da;
+      border-radius: 6px;
+      padding: 10px 11px;
+      background: #ffffff;
+      color: #1f2937;
+      font: inherit;
+    }
+
+    .helper-text {
+      margin: 10px 0 0;
+      color: #7b8794;
+      font-size: 0.9rem;
+    }
+
+    input:focus,
+    select:focus {
+      outline: 3px solid #d8e8ff;
+      border-color: #2f6fed;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .add-button {
+      width: fit-content;
+      background: #1f6feb;
+      color: #ffffff;
+      padding: 12px 18px;
+      font-size: 1rem;
+    }
+
+    .delete-button {
+      background: #f2f4f7;
+      color: #334155;
+      border: 1px solid #d9dee5;
+      padding: 7px 10px;
+      font-size: 0.9rem;
+    }
+
+    .payment-button {
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      background: #ffe6e6;
+      color: #9f1d1d;
+    }
+
+    .payment-button.paid {
+      background: #dcf5e3;
+      color: #176b31;
+    }
+
+    button:hover {
+      filter: brightness(0.97);
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: visible;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 14px 10px;
+      border-bottom: 1px solid #edf0f4;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #526071;
+      font-size: 0.86rem;
+      font-weight: 750;
+      background: #f9fafb;
+    }
+
+    td {
+      font-size: 0.95rem;
+    }
+
+    .client-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .attention-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .attention-today {
+      background: #f59e0b;
+    }
+
+    .attention-payment {
+      background: #dc2626;
+    }
+
+    .status {
+      display: inline-block;
+      border: 0;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 800;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .status-pending {
+      background: #eef0f3;
+      color: #374151;
+    }
+
+    .status-progress {
+      background: #ffe7bd;
+      color: #8a4b00;
+    }
+
+    .status-done {
+      background: #dcf5e3;
+      color: #176b31;
+    }
+
+    .empty {
+      margin: 0;
+      padding: 20px;
+      border: 1px dashed #c8d0da;
+      border-radius: 8px;
+      color: #64748b;
+      background: #f8fafc;
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        padding: 22px 12px;
+      }
+
+      h1 {
+        font-size: 1.55rem;
+      }
+
+      section {
+        padding: 18px;
+        margin-bottom: 22px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .add-button {
+        width: 100%;
+      }
+
+      table,
+      tbody,
+      tr,
+      td {
+        display: block;
+        width: 100%;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        border: 1px solid #edf0f4;
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        background: #ffffff;
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 14px;
+        border-bottom: 1px solid #f1f3f6;
+        padding: 9px 0;
+      }
+
+      td:last-child {
+        border-bottom: 0;
+      }
+
+      td::before {
+        content: attr(data-label);
+        color: #64748b;
+        font-size: 0.84rem;
+        font-weight: 750;
+        flex: 0 0 92px;
+      }
+
+      .client-cell {
+        justify-content: flex-end;
+        text-align: right;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>Job / Booking Tracker</h1>
+      <p class="intro">Keep track of jobs without messy messages or spreadsheets</p>
+    </header>
+
+    <div class="alerts" id="alerts" aria-live="polite" hidden></div>
+
+    <section aria-labelledby="add-job-heading">
+      <h2 id="add-job-heading">Add New Job</h2>
+
+      <form id="jobForm">
+        <div class="form-grid">
+          <label>
+            Client Name
+            <input id="clientName" type="text" placeholder="Sarah Johnson" required />
+          </label>
+
+          <label>
+            Job Type
+            <select id="jobType" required>
+              <option value="Cleaning">Cleaning</option>
+              <option value="Gardening">Gardening</option>
+              <option value="General Job">General Job</option>
+            </select>
+          </label>
+
+          <label>
+            Notes
+            <input id="notes" type="text" placeholder="Weekly clean, needs invoice, morning preferred" />
+          </label>
+
+          <label>
+            Date
+            <input id="jobDate" type="date" required />
+          </label>
+
+          <label>
+            Status
+            <select id="status" required>
+              <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Done">Done</option>
+            </select>
+          </label>
+        </div>
+
+        <button class="add-button" type="submit">Add Job</button>
+      </form>
+
+      <p class="helper-text">Add a job to start keeping everything in one place 👍</p>
+    </section>
+
+    <section aria-labelledby="current-jobs-heading">
+      <h2 id="current-jobs-heading">Current Jobs</h2>
+
+      <div class="table-wrap" id="jobTableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Client Name</th>
+              <th>Job Type</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Notes</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="jobList"></tbody>
+        </table>
+      </div>
+
+      <p class="empty" id="emptyMessage" hidden>No jobs yet — add one above to get started 👍</p>
+    </section>
+  </main>
+
+  <script>
+    const jobs = [
+      {
+        clientName: "Sarah Johnson",
+        jobType: "Cleaning",
+        date: "2026-06-01",
+        status: "Pending",
+        paid: false,
+        notes: "Weekly clean. Has dog at home."
+      },
+      {
+        clientName: "Ned Kelly",
+        jobType: "Gardening",
+        date: "2026-06-06",
+        status: "In Progress",
+        paid: false,
+        notes: "Lawn mowing. Every Saturday."
+      },
+      {
+        clientName: "Shane Warne",
+        jobType: "Cleaning",
+        date: "2026-06-10",
+        status: "Done",
+        paid: false,
+        notes: "Bond clean. Needs invoice."
+      },
+      {
+        clientName: "David Nguyen",
+        jobType: "General Job",
+        date: "2026-06-12",
+        status: "Pending",
+        paid: false,
+        notes: "Small repairs. Morning preferred."
+      },
+      {
+        clientName: "Priya Patel",
+        jobType: "Gardening",
+        date: "2026-06-14",
+        status: "Pending",
+        paid: true,
+        notes: "Hedge trim and green waste removal."
+      }
+    ];
+
+    const alerts = document.querySelector("#alerts");
+    const jobForm = document.querySelector("#jobForm");
+    const clientNameInput = document.querySelector("#clientName");
+    const jobTypeInput = document.querySelector("#jobType");
+    const notesInput = document.querySelector("#notes");
+    const jobDateInput = document.querySelector("#jobDate");
+    const statusInput = document.querySelector("#status");
+    const jobList = document.querySelector("#jobList");
+    const jobTableWrap = document.querySelector("#jobTableWrap");
+    const emptyMessage = document.querySelector("#emptyMessage");
+
+    jobForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const job = {
+        clientName: clientNameInput.value.trim(),
+        jobType: jobTypeInput.value,
+        notes: notesInput.value.trim(),
+        date: jobDateInput.value,
+        status: statusInput.value,
+        paid: false
+      };
+
+      if (!job.clientName || !job.date) {
+        return;
+      }
+
+      jobs.push(job);
+      jobForm.reset();
+      renderJobs();
+      clientNameInput.focus();
+    });
+
+    jobList.addEventListener("click", function (event) {
+      const statusButton = event.target.closest(".status");
+      const paymentButton = event.target.closest(".payment-button");
+      const deleteButton = event.target.closest(".delete-button");
+
+      if (statusButton) {
+        const jobIndex = Number(statusButton.dataset.index);
+        jobs[jobIndex].status = getNextStatus(jobs[jobIndex].status);
+        renderJobs();
+        return;
+      }
+
+      if (paymentButton) {
+        const jobIndex = Number(paymentButton.dataset.index);
+        jobs[jobIndex].paid = !jobs[jobIndex].paid;
+        renderJobs();
+        return;
+      }
+
+      if (!deleteButton) {
+        return;
+      }
+
+      const jobIndex = Number(deleteButton.dataset.index);
+      jobs.splice(jobIndex, 1);
+      renderJobs();
+    });
+
+    function renderJobs() {
+      jobList.innerHTML = "";
+      renderAlerts();
+
+      jobTableWrap.hidden = jobs.length === 0;
+      emptyMessage.hidden = jobs.length > 0;
+
+      jobs.forEach(function (job, index) {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+          <td data-label="Client"></td>
+          <td data-label="Job Type"></td>
+          <td data-label="Date"></td>
+          <td data-label="Status"><button class="status" type="button" data-index="${index}" aria-label="Change job status"></button></td>
+          <td data-label="Payment"></td>
+          <td data-label="Notes"></td>
+          <td data-label="Action"><button class="delete-button" type="button" data-index="${index}">Delete</button></td>
+        `;
+
+        row.children[0].appendChild(createClientLabel(job));
+        row.children[1].textContent = job.jobType;
+        row.children[2].textContent = formatDate(job.date);
+        row.children[5].textContent = job.notes || "-";
+
+        const statusLabel = row.querySelector(".status");
+        statusLabel.textContent = job.status;
+        statusLabel.classList.add(getStatusClass(job.status));
+
+        const paymentButton = document.createElement("button");
+        paymentButton.type = "button";
+        paymentButton.dataset.index = index;
+        paymentButton.className = job.paid ? "payment-button paid" : "payment-button";
+        paymentButton.textContent = job.paid ? "Paid" : "Unpaid";
+        row.children[4].appendChild(paymentButton);
+
+        jobList.appendChild(row);
+      });
+    }
+
+    function renderAlerts() {
+      const todayJobs = jobs.filter(function (job) {
+        return isToday(job.date) && job.status !== "Done";
+      });
+
+      const unpaidDoneJobs = jobs.filter(function (job) {
+        return job.status === "Done" && !job.paid;
+      });
+
+      const messages = [];
+
+      if (todayJobs.length > 0) {
+        messages.push("You have " + todayJobs.length + " " + getJobWord(todayJobs.length) + " scheduled for today that " + getIsAre(todayJobs.length) + " not completed yet");
+      }
+
+      if (unpaidDoneJobs.length > 0) {
+        messages.push("Reminder: " + unpaidDoneJobs.length + " " + getJobWord(unpaidDoneJobs.length) + " completed but not marked as paid");
+      }
+
+      alerts.innerHTML = "";
+      alerts.hidden = messages.length === 0;
+
+      messages.forEach(function (message) {
+        const alert = document.createElement("div");
+        alert.className = "alert";
+        alert.textContent = "⚠️ " + message;
+        alerts.appendChild(alert);
+      });
+    }
+
+    function createClientLabel(job) {
+      const label = document.createElement("span");
+      label.className = "client-cell";
+
+      const attentionType = getAttentionType(job);
+
+      if (attentionType) {
+        const dot = document.createElement("span");
+        dot.className = "attention-dot " + attentionType.className;
+        dot.title = attentionType.title;
+        label.appendChild(dot);
+      }
+
+      const name = document.createElement("span");
+      name.textContent = job.clientName;
+      label.appendChild(name);
+
+      return label;
+    }
+
+    function getAttentionType(job) {
+      if (job.status === "Done" && !job.paid) {
+        return {
+          className: "attention-payment",
+          title: "Completed but unpaid"
+        };
+      }
+
+      if (isToday(job.date) && job.status !== "Done") {
+        return {
+          className: "attention-today",
+          title: "Scheduled for today"
+        };
+      }
+
+      return null;
+    }
+
+    function getStatusClass(status) {
+      if (status === "In Progress") {
+        return "status-progress";
+      }
+
+      if (status === "Done") {
+        return "status-done";
+      }
+
+      return "status-pending";
+    }
+
+    function getNextStatus(status) {
+      if (status === "Pending") {
+        return "In Progress";
+      }
+
+      if (status === "In Progress") {
+        return "Done";
+      }
+
+      return "Pending";
+    }
+
+    function isToday(dateValue) {
+      return dateValue === getTodayDate();
+    }
+
+    function getTodayDate() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const day = String(today.getDate()).padStart(2, "0");
+
+      return year + "-" + month + "-" + day;
+    }
+
+    function getJobWord(count) {
+      return count === 1 ? "job" : "jobs";
+    }
+
+    function getIsAre(count) {
+      return count === 1 ? "is" : "are";
+    }
+
+    function formatDate(dateValue) {
+      if (!dateValue) {
+        return "-";
+      }
+
+      const date = new Date(dateValue + "T00:00:00");
+
+      return date.toLocaleDateString(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      });
+    }
+
+    renderJobs();
+  </script>
+</body>
+</html>
